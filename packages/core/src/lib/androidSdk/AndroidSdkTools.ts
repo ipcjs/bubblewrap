@@ -84,9 +84,9 @@ export class AndroidSdkTools {
     const sdkManagerPathSuffix = this.process.platform === 'win32' ? '.bat' : '';
     let sdkManagerPath: string | undefined;
     const sdkManagerRelativePaths = [
-      'cmdline-tools/latest/bin/sdkmanager',
-      'tools/bin/sdkmanager',
-      'bin/sdkmanager',
+      'cmdline-tools/latest/bin/sdkmanager', // Latest versions
+      'bin/sdkmanager', // Version 6858069
+      'tools/bin/sdkmanager', // Older versions
     ];
     for (const relativePath of sdkManagerRelativePaths) {
       const path = this.pathJoin(this.getAndroidHome(), relativePath) + sdkManagerPathSuffix;
@@ -250,12 +250,12 @@ export class AndroidSdkTools {
     const toolsPath = path.join(sdkPath, 'tools');
     const binPath = path.join(sdkPath, 'bin');
 
-    // Checks if the path provided is valid. Older versions of the the Android SDK add the
-    // initial files inside the `tools` folder. Version `6858069` and above add it directly
-    // to the `bin` folder.
+    // Checks if the path provided is valid. Older versions of the Android SDK add the
+    // initial files inside the `tools` folder. Version `6858069` add it directly
+    // to the `bin` folder. The latest versions add it to the `cmdline-tools` directory.
     if (
       !fs.existsSync(sdkPath) ||
-      (!fs.existsSync(cmdlineToolsPath) && !fs.existsSync(toolsPath)) && !fs.existsSync(binPath)
+      (!fs.existsSync(cmdlineToolsPath) && !fs.existsSync(binPath) && !fs.existsSync(toolsPath))
     ) {
       return Result.error(
           new ValidatePathError('The provided androidSdk isn\'t correct.', 'PathIsNotCorrect'));

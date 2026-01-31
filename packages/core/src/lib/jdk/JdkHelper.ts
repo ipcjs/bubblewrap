@@ -137,10 +137,12 @@ export class JdkHelper {
     // Concatenates the Java binary path to the existing PATH environment variable.
     let pathEnvironmentKey = 'PATH';
     let pathEnvironment = env['PATH'];
-    if (process.platform === 'win32') {
+    if (this.process.platform === 'win32') {
+      // On Windows, env vars are case-insensitive. Node.js uses the first match in
+      // lexicographic order, so we remove 'PATH' to avoid conflicts with 'Path'.
       delete env['PATH'];
       pathEnvironmentKey = 'Path';
-      pathEnvironment = env['Path'] || pathEnvironment;
+      pathEnvironment = env['Path'] || pathEnvironment || '';
     }
     env[pathEnvironmentKey] = this.getJavaBin() + this.pathSeparator + pathEnvironment;
     return env;
