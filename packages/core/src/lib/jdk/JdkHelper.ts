@@ -34,7 +34,6 @@ export class JdkHelper {
   private config: Config;
   private joinPath: JoinPathFunction;
   private pathSeparator: string;
-  private pathEnvironmentKey: string;
 
   /**
    * Constructs a new instance of JdkHelper.
@@ -48,11 +47,9 @@ export class JdkHelper {
     if (process.platform === 'win32') {
       this.joinPath = path.win32.join;
       this.pathSeparator = ';';
-      this.pathEnvironmentKey = 'Path';
     } else {
       this.joinPath = path.posix.join;
       this.pathSeparator = ':';
-      this.pathEnvironmentKey = 'PATH';
     }
   }
 
@@ -138,8 +135,14 @@ export class JdkHelper {
     const env: NodeJS.ProcessEnv = Object.assign({}, this.process.env);
     env['JAVA_HOME'] = this.getJavaHome();
     // Concatenates the Java binary path to the existing PATH environment variable.
-    env[this.pathEnvironmentKey] =
-        this.getJavaBin() + this.pathSeparator + env[this.pathEnvironmentKey];
+    let pathEnvironmentKey = 'PATH';
+    let pathEnvironment = env['PATH'];
+    if (process.platform === 'win32') {
+      delete env['PATH'];
+      pathEnvironmentKey = 'Path';
+      pathEnvironment = env['Path'] || pathEnvironment;
+    }
+    env[pathEnvironmentKey] = this.getJavaBin() + this.pathSeparator + pathEnvironment;
     return env;
   }
 }
